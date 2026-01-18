@@ -1,42 +1,35 @@
 from textual.app import App, ComposeResult
-from textual.containers import Horizontal, VerticalScroll, Container
+from textual.containers import Horizontal, VerticalScroll, Container, Grid
 from textual.widgets import Header, Footer, Button, Label, Static, TabbedContent, TabPane, Input, ListView, ListItem, Checkbox
 from textual.reactive import reactive
 from textual.message import Message
 import logic
-import math
-from logic import GestorUltradiano 
 
-# --- WIDGET PERSONALIZADO: BARRA ESTILO BTOP ---
+# --- COMPONENTES VISUALES ---
+
 class BtopBar(Static):
-    """Barra de progreso renderizada con bloques Unicode."""
+    """Barra de progreso reactiva."""
     progress = reactive(0.0)
-    
     BARS = [" ", " ", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
 
+    def watch_progress(self, val):
+        self.remove_class("p-low", "p-med", "p-high")
+        if val < 50: self.add_class("p-low")
+        elif val < 80: self.add_class("p-med")
+        else: self.add_class("p-high")
+
     def render(self):
-        # 1. Calcular cuántos bloques llenos necesitamos
         width = self.content_size.width or 20
-        total_chars = width
-        
-        # Porcentaje normalizado (0.0 a 1.0)
+        if width <= 0: return ""
         p = min(max(self.progress / 100.0, 0), 1)
-        
-        filled_chars = int(total_chars * p)
-        remainder = (total_chars * p) - filled_chars
-        
-        # Construir la barra
-        bar_str = "█" * filled_chars
-        
-        # Añadir el carácter parcial (el detalle fino)
-        if filled_chars < total_chars:
+        total = width
+        filled = int(total * p)
+        remainder = (total * p) - filled
+        bar = "█" * filled
+        if filled < total:
             idx = int(remainder * (len(self.BARS) - 1))
-            bar_str += self.BARS[idx]
-            
-        # Rellenar con vacío el resto
-        bar_str = bar_str.ljust(total_chars, " ")
-        
-        return bar_str 
+            bar += self.BARS[idx]
+        return bar.ljust(total, " ")
 
 class Sidebar(Static):
     """Panel lateral de estadísticas."""
@@ -49,8 +42,11 @@ class Sidebar(Static):
         self.lbl_total = Label("0.0", classes="stat-value")
         yield self.lbl_total
         yield Label("Progreso Global:", classes="stat-label")
-        self.bar_global = BtopBar(classes="btop-bar-global") # Usamos nuestra barra
+        self.bar_global = BtopBar(classes="btop-bar-global")
         yield self.bar_global
+        
+        # BOTONES DE CONTROL
+        yield Button("Cambiar Vista ⧉", id="btn_view_toggle", variant="primary")
         yield Button("Reiniciar Semana", id="btn_reset", variant="error")
 
     def actualizar(self, stats):
@@ -59,7 +55,6 @@ class Sidebar(Static):
         self.bar_global.progress = stats['progreso_general']
 
 class MateriaWidget(Static):
-    """Fila individual por materia."""
     horas = reactive(0.0)
 
     def __init__(self, materia_obj):
@@ -68,17 +63,12 @@ class MateriaWidget(Static):
         self.horas = materia_obj.horas_acumuladas
 
     def compose(self) -> ComposeResult:
-        # Layout horizontal para nombre, barra y botón
         yield Label(f"{self.materia.nombre[:15]:<15}", classes="nombre-materia")
-        
-        # Barra Btop personalizada
         self.progress_bar = BtopBar(classes="barra-materia")
         self.progress_bar.progress = self.materia.obtener_progreso()
         yield self.progress_bar
-        
         self.lbl_stats = Label(f"{self.horas:.1f}/{self.materia.meta_semanal}h", classes="stats-materia")
         yield self.lbl_stats
-        
         yield Button("+", id="btn_add", classes="btn-small")
 
     def watch_horas(self, val):
@@ -94,10 +84,21 @@ class MateriaWidget(Static):
             self.horas += 1.0
             self.post_message(self.Cambio())
 
-class ToDoWidget(Static):
-    """Gestor de tareas pendientes."""
+class TrackerPanel(Static):
+    """Panel encapsulado para la lista de materias."""
     def compose(self) -> ComposeResult:
-        yield Label(":: TAREAS PENDIENTES ::", classes="sidebar-title")
+        yield Label(":: TRACKER ::", classes="sidebar-title")
+        yield VerticalScroll(id="lista_container")
+
+    def recargar_materias(self, materias):
+        container = self.query_one("#lista_container")
+        container.remove_children() # Limpiar lista anterior
+        for m in materias:
+            container.mount(MateriaWidget(m))
+
+class ToDoWidget(Static):
+    def compose(self) -> ComposeResult:
+        yield Label(":: TAREAS ::", classes="sidebar-title")
         yield ListView(id="list_tasks")
         yield Input(placeholder="Nueva tarea... (Enter)", id="inp_task")
 
@@ -109,138 +110,165 @@ class ToDoWidget(Static):
 
     def agregar_item(self, texto, hecho):
         lv = self.query_one("#list_tasks", ListView)
-        cb = Checkbox(texto, value=hecho)
-        lv.append(ListItem(cb))
+        cb = Checkbox(texto, value=hecho, classes="task-cb")
+        btn = Button("✖", variant="error", classes="btn-delete")
+        lv.append(ListItem(Horizontal(cb, btn, classes="task-container")))
+
+    def on_button_pressed(self, event: Button.Pressed):
+        if "btn-delete" in event.button.classes:
+            node = event.button
+            while node.parent:
+                node = node.parent
+                if isinstance(node, ListItem):
+                    node.remove()
+                    self.post_message(self.Cambio())
+                    break
 
     def on_checkbox_changed(self, event):
         self.post_message(self.Cambio())
 
+    def recargar_todos(self, todos):
+        # Limpiar y reconstruir
+        try:
+            lv = self.query_one("#list_tasks", ListView)
+            lv.remove_children()
+            for t in todos:
+                if isinstance(t, dict):
+                    self.agregar_item(t.get('text', ''), t.get('done', False))
+        except: pass
+
     class Cambio(Message): pass
-# --- WIDGET POMODORO/ULTRADIANO ---
+
 class PomodoroWidget(Static):
-    """Interfaz gráfica del timer."""
-    
     def compose(self) -> ComposeResult:
-        # Instanciamos el motor lógico
-        self.engine = GestorUltradiano()
-        self.timer_active = False # Controla si el tick corre en la UI
+        # Usamos la instancia GLOBAL para compartir estado entre vistas
+        self.engine = logic.motor_ultradiano_global
+        self.timer_active = False 
 
         yield Label(":: FLUJO ULTRADIANO ::", classes="sidebar-title")
-        
-        # Display del tiempo
         yield Container(
             Label("IDLE", id="lbl_status"),
             Label("90:00", id="lbl_time"),
             classes="timer-container"
         )
-
-        # Barra de progreso (Reusamos tu BtopBar)
         self.progress_bar = BtopBar(classes="barra-materia")
         yield self.progress_bar
-
-        # Controles
         with Horizontal(classes="timer-controls"):
-            yield Button("Iniciar (90m)", id="btn_start_90", variant="success")
-            yield Button("Pausar/Reanudar", id="btn_pause", variant="primary")
-            yield Button("Break Dinámico", id="btn_break", variant="warning")
-            yield Button("Reset", id="btn_reset", variant="error")
+            yield Button("Go(90m)", id="btn_start_90", variant="success", classes="btn-pomo")
+            yield Button("II/▶", id="btn_pause", variant="primary", classes="btn-pomo")
+            yield Button("Break", id="btn_break", variant="warning", classes="btn-pomo")
+            yield Button("Rst", id="btn_reset", variant="error", classes="btn-pomo")
 
     def on_mount(self):
-        # Creamos un intervalo que se ejecuta cada 1 segundo
         self.set_interval(1.0, self.update_timer)
 
     def update_timer(self):
-        """El corazón del loop."""
+        # Sincronizamos con el motor global
+        terminado = False
         if self.timer_active:
             terminado = self.engine.tick()
-            
-            # Actualizar UI
+
+        # Actualizar UI siempre (por si otro widget movió el motor)
+        try:
             self.query_one("#lbl_time").update(self.engine.formatear_tiempo())
             self.query_one("#lbl_status").update(self.engine.state)
-            
-            # Actualizar barra
             self.progress_bar.progress = self.engine.obtener_progreso()
             
-            # Gestionar cambio de color según estado
             lbl_time = self.query_one("#lbl_time")
-            if self.engine.state == "WORK":
-                lbl_time.remove_class("time-break")
-                lbl_time.add_class("time-work")
-            elif self.engine.state == "BREAK":
-                lbl_time.remove_class("time-work")
-                lbl_time.add_class("time-break")
+            lbl_time.remove_class("time-work", "time-break")
+            if self.engine.state == "WORK": lbl_time.add_class("time-work")
+            elif self.engine.state == "BREAK": lbl_time.add_class("time-break")
 
             if terminado:
                 self.timer_active = False
                 self.notify("¡Ciclo Terminado!", severity="information")
-                if self.engine.state == "WORK":
-                    # Auto-iniciar break o esperar? Mejor esperar usuario
-                    self.query_one("#lbl_status").update("DONE - TAKE BREAK")
+        except: pass
 
     def on_button_pressed(self, event):
         btn_id = event.button.id
-        
         if btn_id == "btn_start_90":
             self.engine.iniciar_trabajo(90)
             self.timer_active = True
-            self.query_one("#lbl_status").update("DEEP WORK")
-            
         elif btn_id == "btn_pause":
-            # Toggle simple
             self.timer_active = not self.timer_active
-            status = "PAUSED" if not self.timer_active else self.engine.state
-            self.query_one("#lbl_status").update(status)
-            
         elif btn_id == "btn_break":
-            # Forzar el descanso dinámico basado en lo que hayas trabajado
             self.engine.iniciar_descanso()
             self.timer_active = True
-            descanso_min = self.engine.target_seconds // 60
-            self.notify(f"Descanso calculado: {descanso_min} min")
-            
         elif btn_id == "btn_reset":
             self.timer_active = False
-            self.engine.iniciar_trabajo(90) # Reset a estado base
+            self.engine.iniciar_trabajo(90)
             self.engine.state = "IDLE"
-            self.query_one("#lbl_time").update("90:00")
-            self.query_one("#lbl_status").update("READY")
-            self.progress_bar.progress = 0
 
+# --- VISTA DASHBOARD (REJILLA) ---
+class DashboardView(Container):
+    """Vista 'God Mode' con todo visible a la vez."""
+    def compose(self) -> ComposeResult:
+        # Columna Izquierda: Tracker
+        yield TrackerPanel(id="dash_tracker")
+        
+        # Columna Derecha: Pomodoro (Arriba) y ToDo (Abajo)
+        with Container(id="dash_right_col"):
+            yield PomodoroWidget(id="dash_pomodoro")
+            yield ToDoWidget(id="dash_todo")
+
+# --- APP PRINCIPAL ---
 class StudyApp(App):
-    CSS_PATH = [
-        "/home/ateniense/.cache/wal/textual.tcss", 
-        "estilo.css"
-    ]
+    CSS_PATH = ["/home/ateniense/.cache/wal/textual.tcss", "estilo.css"]
     BINDINGS = [("q", "quit", "Salir")]
+
+    # Variable reactiva para controlar qué vista se muestra
+    show_dashboard = reactive(True)
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="main_layout"):
             yield Sidebar()
             
-            # --- PESTAÑAS PARA ORGANIZACIÓN ---
-            with TabbedContent(initial="tab_materias"):
+            # --- VISTA 1: TABS CLÁSICAS ---
+            with TabbedContent(initial="tab_materias", id="view_tabs"):
                 with TabPane("Tracker", id="tab_materias"):
-                    with VerticalScroll(id="lista_container"):
-                        pass 
+                    yield TrackerPanel(id="tab_tracker_panel")
                 with TabPane("To-Do List", id="tab_todo"):
-                    yield ToDoWidget()
-
+                    yield ToDoWidget(id="tab_todo_widget")
                 with TabPane("Ultradian Timer", id="tab_pomodoro"):
-                    yield PomodoroWidget()
+                    yield PomodoroWidget(id="tab_pomodoro_widget")
+            
+            # --- VISTA 2: DASHBOARD (Oculto por defecto) ---
+            yield DashboardView(id="view_dashboard")
+                    
+
     def on_mount(self):
+        self.cargar_datos_y_refrescar()
+
+    def watch_show_dashboard(self, show: bool):
+        """Alternar visibilidad CSS basado en la variable reactiva."""
+        tabs = self.query_one("#view_tabs")
+        dash = self.query_one("#view_dashboard")
+        
+        if show:
+            tabs.display = False
+            dash.display = True
+            # Forzar refresco al mostrar dashboard para sincronizar datos
+            self.cargar_datos_y_refrescar()
+        else:
+            tabs.display = True
+            dash.display = False
+            self.cargar_datos_y_refrescar()
+
+    def cargar_datos_y_refrescar(self):
+        """Carga datos de disco y los inyecta en TODOS los widgets."""
         datos = logic.cargar_datos_globales()
         self.materias = datos["materias"]
         self.todos = datos["todos"]
 
-        lista = self.query_one("#lista_container")
-        for m in self.materias:
-            lista.mount(MateriaWidget(m))
+        # Refrescar Paneles de Materias (hay dos: uno en tabs, uno en dash)
+        for panel in self.query(TrackerPanel):
+            panel.recargar_materias(self.materias)
 
-        todo_widget = self.query_one(ToDoWidget)
-        for t in self.todos:
-            if isinstance(t, dict):
-                todo_widget.agregar_item(t.get('text', ''), t.get('done', False))
+        # Refrescar ToDos (hay dos)
+        for widget in self.query(ToDoWidget):
+            widget.recargar_todos(self.todos)
 
+        # Actualizar Sidebar
         self.actualizar_sidebar()
 
     def actualizar_sidebar(self):
@@ -248,33 +276,46 @@ class StudyApp(App):
         self.query_one(Sidebar).actualizar(stats)
 
     def guardar_todo(self):
-        """Centraliza el guardado."""
-        tasks_ui = []
-        try:
-            list_view = self.query_one("#list_tasks", ListView)
-            for item in list_view.children:
-                cb = item.query_one(Checkbox)
-                tasks_ui.append({"text": str(cb.label), "done": cb.value})
-            self.todos = tasks_ui
-        except:
-            pass # Si el widget no está cargado (pestaña oculta), usamos self.todos de memoria
+        # Recolectar ToDos del widget visible actual
+        visible_todo_widget = None
+        if self.show_dashboard:
+            visible_todo_widget = self.query_one("#dash_todo", ToDoWidget)
+        else:
+            visible_todo_widget = self.query_one("#tab_todo_widget", ToDoWidget)
+            
+        if visible_todo_widget:
+            tasks_ui = []
+            try:
+                # Extraemos datos manualmente del widget visible
+                list_view = visible_todo_widget.query_one("ListView")
+                for item in list_view.children:
+                    # Buscamos el checkbox dentro del Horizontal
+                    cb = item.query_one(Checkbox)
+                    tasks_ui.append({"text": str(cb.label), "done": cb.value})
+                self.todos = tasks_ui
+            except: pass
 
         logic.guardar_datos_globales(self.materias, self.todos)
+        
+        # IMPORTANTE: Sincronizar el otro widget que no se ve
+        self.cargar_datos_y_refrescar()
 
+    # --- MANEJO DE EVENTOS ---
     def on_materia_widget_cambio(self, msg):
         self.guardar_todo()
-        self.actualizar_sidebar()
 
     def on_to_do_widget_cambio(self, msg):
         self.guardar_todo()
 
     def on_button_pressed(self, event):
-        if event.button.id == "btn_reset":
+        bid = event.button.id
+        if bid == "btn_reset":
             logic.reiniciar_semana(self.materias)
-            for widget in self.query(MateriaWidget):
-                widget.horas = 0.0
             self.guardar_todo()
-            self.actualizar_sidebar()
+            self.notify("Semana Reiniciada")
+        elif bid == "btn_view_toggle":
+            # Alternar vista
+            self.show_dashboard = not self.show_dashboard
 
 if __name__ == "__main__":
     app = StudyApp()

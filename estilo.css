@@ -108,7 +108,7 @@ MateriaWidget {
     layout: horizontal;
     margin-bottom: 1;
     padding: 1;
-    border-bottom: solid ansi_bright_black; 
+    border-bottom: solid ansi_bright_black;
 }
 
 .nombre-materia {
@@ -147,24 +147,41 @@ ToDoWidget {
     height: 100%;
 }
 
-#list_tasks {
-    height: 1fr;
-    /* CORRECCIÓN: Reemplazado $link-color por $accent */
-    border: heavy $accent; 
+ListItem {
+    padding: 0; /* Quitamos padding del item para que el contenedor controle todo */
     background: $background;
-    margin-bottom: 1;
+    height: auto;
 }
 
-ListItem {
+/* El contenedor interno (Horizontal) */
+.task-container {
+    height: auto;
+    width: 100%;
+    align: left middle; /* Alineación vertical centrada */
     padding: 1;
 }
 
-#inp_task {
-    dock: bottom;
-    border: round $primary;
-    background: $background;
+/* El Checkbox (ocupa todo el espacio sobrante) */
+.task-cb {
+    width: 1fr;
+    height: auto;
+    color: $foreground;
 }
 
+/* El Botón de Eliminar */
+.btn-delete {
+    min-width: 4;     /* Ancho fijo pequeño */
+    height: 1;        /* Altura mínima */
+    background: transparent; /* Fondo transparente para ser sutil */
+    color: $error;    /* La X en rojo */
+    border: none;
+    margin-left: 1;
+}
+
+.btn-delete:hover {
+    background: $error;
+    color: $background;
+}
 /* --- BARRA ESTILO BTOP (Colores Dinámicos) --- */
 
 /* Clase base (forma y alineación) */
@@ -190,3 +207,58 @@ BtopBar.p-high {
 .btop-bar-global {
     color: $success; 
 } 
+/* --- BOTÓN DE CAMBIO DE VISTA --- */
+#btn_view_toggle {
+    width: 100%;
+    margin-top: 1;
+    background: $primary;
+    color: $background;
+}
+
+/* --- DASHBOARD VIEW (GOD MODE) --- */
+DashboardView {
+    layout: horizontal; /* Dos columnas principales */
+    height: 100%;
+    background: $background;
+    display: none; /* Oculto por defecto */
+}
+
+/* Columna Izquierda: Tracker */
+#dash_tracker {
+    width: 50%;
+    height: 100%;
+    border: round $primary;
+    margin-right: 1;
+    background: $surface;
+    padding: 1;
+}
+
+/* Columna Derecha: Contenedor para Pomodoro y ToDo */
+#dash_right_col {
+    width: 50%;
+    height: 100%;
+    layout: vertical;
+}
+
+/* Panel Pomodoro en Dashboard */
+#dash_pomodoro {
+    height: 40%; /* Menos altura para el reloj */
+    border: round $secondary;
+    margin-bottom: 1;
+    background: $surface;
+    padding: 1;
+}
+
+/* Panel ToDo en Dashboard */
+#dash_todo {
+    height: 60%; /* Más espacio para la lista */
+    border: round $accent;
+    background: $surface;
+    padding: 1;
+}
+
+/* Ajuste de botones Pomodoro para espacios pequeños */
+.btn-pomo {
+    min-width: 8;
+    margin: 0 1;
+}

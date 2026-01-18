@@ -141,3 +141,7 @@ def _datos_por_defecto():
         ("Probabilidad", 2), ("Lab. Termodinamica", 1), ("Pensamiento H.", 1)
     ]
     return [Materia(n, m) for n, m in raw]
+
+# --- INSTANCIA GLOBAL (SINGLETON) ---
+# Esto asegura que el timer sea el mismo en todas las vistas
+motor_ultradiano_global = GestorUltradiano()

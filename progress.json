@@ -46,14 +46,5 @@
             "horas_acumuladas": 0.0
         }
     ],
-    "todos": [
-        {
-            "text": "hjgb",
-            "done": true
-        },
-        {
-            "text": "jbikiv",
-            "done": true
-        }
-    ]
+    "todos": []
 }
