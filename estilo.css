@@ -6,18 +6,6 @@ Screen {
     color: $foreground;
 }
 
-/* --- CRÍTICO: FORZAR EXPANSIÓN DE PESTAÑAS --- */
-TabbedContent {
-    height: 1fr; /* Ocupa todo el espacio restante bajo el Header/Footer */
-}
-
-ContentSwitcher {
-    height: 1fr; /* El contenedor interno de las pestañas también debe estirarse */
-}
-
-TabPane {
-    height: 1fr; /* Cada panel individual hereda la altura completa */
-}
 
 /* --- LAYOUT PRINCIPAL --- */
 #main_layout {
@@ -55,11 +43,6 @@ Sidebar {
 }
 
 /* Barra de progreso global personalizada */
-.btop-bar-global {
-    height: 1;
-    color: $success;
-    margin-bottom: 2;
-}
 
 #btn_reset {
     width: 100%;
@@ -71,32 +54,48 @@ Sidebar {
 }
 
 /* --- SISTEMA DE PESTAÑAS (Tabs) --- */
+TabbedContent {
+    height: 1fr;
+}
+
+ContentSwitcher {
+    height: 1fr;
+}
+
+TabPane {
+    height: 1fr;
+    padding: 0 1;
+}
+
 Tabs {
-    background: $background;
     dock: top;
+    background: $surface;
+    height: 3; 
     margin-bottom: 1;
-    color: red;
 }
 
 Tab {
-    padding: 10 20;
-    height: 10;
-    /* ¡AQUÍ ESTÁ LA SOLUCIÓN! */
-    /* Definimos el color base para pestañas inactivas */
-    color: $primary; 
+    height: 3;
+    padding: 0 2;
+    
+    content-align: center middle;
+    color: ansi_white; 
     text-style: bold;
 }
 
-/* Estado Hover (Opcional: para feedback visual al pasar el mouse) */
 Tab:hover {
-    color: $foreground;
+    color: $accent;
+    background: $surface; 
 }
 
-/* Estado Activo (Pestaña seleccionada) */
 Tab.-active {
-    color: $accent;
-    text-style: bold underline reverse; /* 'reverse' resalta el fondo del texto */
+    background: $surface;
+    color: $accent;       
+    content-align: center middle; 
+    border-bottom: heavy $accent; 
+    text-style: bold;
 }
+
 /* --- CONTENIDO: TRACKER DE MATERIAS --- */
 #lista_container {
     height: 100%;
@@ -165,3 +164,29 @@ ListItem {
     border: round $primary;
     background: $background;
 }
+
+/* --- BARRA ESTILO BTOP (Colores Dinámicos) --- */
+
+/* Clase base (forma y alineación) */
+BtopBar {
+    width: 1fr;
+    content-align: center middle;
+    color: $secondary; 
+}
+
+BtopBar.p-low {
+    color: $primary; 
+}
+
+BtopBar.p-med {
+    color: $secondary;
+}
+
+BtopBar.p-high {
+    color: $accent;
+    text-style: bold; 
+}
+
+.btop-bar-global {
+    color: $success; 
+} 

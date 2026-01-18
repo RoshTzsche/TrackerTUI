@@ -5,6 +5,7 @@ from textual.reactive import reactive
 from textual.message import Message
 import logic
 import math
+from logic import GestorUltradiano 
 
 # --- WIDGET PERSONALIZADO: BARRA ESTILO BTOP ---
 class BtopBar(Static):
@@ -35,7 +36,7 @@ class BtopBar(Static):
         # Rellenar con vacío el resto
         bar_str = bar_str.ljust(total_chars, " ")
         
-        return f"[{'#00ff00' if p > 0.8 else '#00afff'}]{bar_str}[/]"
+        return bar_str 
 
 class Sidebar(Static):
     """Panel lateral de estadísticas."""
@@ -115,6 +116,95 @@ class ToDoWidget(Static):
         self.post_message(self.Cambio())
 
     class Cambio(Message): pass
+# --- WIDGET POMODORO/ULTRADIANO ---
+class PomodoroWidget(Static):
+    """Interfaz gráfica del timer."""
+    
+    def compose(self) -> ComposeResult:
+        # Instanciamos el motor lógico
+        self.engine = GestorUltradiano()
+        self.timer_active = False # Controla si el tick corre en la UI
+
+        yield Label(":: FLUJO ULTRADIANO ::", classes="sidebar-title")
+        
+        # Display del tiempo
+        yield Container(
+            Label("IDLE", id="lbl_status"),
+            Label("90:00", id="lbl_time"),
+            classes="timer-container"
+        )
+
+        # Barra de progreso (Reusamos tu BtopBar)
+        self.progress_bar = BtopBar(classes="barra-materia")
+        yield self.progress_bar
+
+        # Controles
+        with Horizontal(classes="timer-controls"):
+            yield Button("Iniciar (90m)", id="btn_start_90", variant="success")
+            yield Button("Pausar/Reanudar", id="btn_pause", variant="primary")
+            yield Button("Break Dinámico", id="btn_break", variant="warning")
+            yield Button("Reset", id="btn_reset", variant="error")
+
+    def on_mount(self):
+        # Creamos un intervalo que se ejecuta cada 1 segundo
+        self.set_interval(1.0, self.update_timer)
+
+    def update_timer(self):
+        """El corazón del loop."""
+        if self.timer_active:
+            terminado = self.engine.tick()
+            
+            # Actualizar UI
+            self.query_one("#lbl_time").update(self.engine.formatear_tiempo())
+            self.query_one("#lbl_status").update(self.engine.state)
+            
+            # Actualizar barra
+            self.progress_bar.progress = self.engine.obtener_progreso()
+            
+            # Gestionar cambio de color según estado
+            lbl_time = self.query_one("#lbl_time")
+            if self.engine.state == "WORK":
+                lbl_time.remove_class("time-break")
+                lbl_time.add_class("time-work")
+            elif self.engine.state == "BREAK":
+                lbl_time.remove_class("time-work")
+                lbl_time.add_class("time-break")
+
+            if terminado:
+                self.timer_active = False
+                self.notify("¡Ciclo Terminado!", severity="information")
+                if self.engine.state == "WORK":
+                    # Auto-iniciar break o esperar? Mejor esperar usuario
+                    self.query_one("#lbl_status").update("DONE - TAKE BREAK")
+
+    def on_button_pressed(self, event):
+        btn_id = event.button.id
+        
+        if btn_id == "btn_start_90":
+            self.engine.iniciar_trabajo(90)
+            self.timer_active = True
+            self.query_one("#lbl_status").update("DEEP WORK")
+            
+        elif btn_id == "btn_pause":
+            # Toggle simple
+            self.timer_active = not self.timer_active
+            status = "PAUSED" if not self.timer_active else self.engine.state
+            self.query_one("#lbl_status").update(status)
+            
+        elif btn_id == "btn_break":
+            # Forzar el descanso dinámico basado en lo que hayas trabajado
+            self.engine.iniciar_descanso()
+            self.timer_active = True
+            descanso_min = self.engine.target_seconds // 60
+            self.notify(f"Descanso calculado: {descanso_min} min")
+            
+        elif btn_id == "btn_reset":
+            self.timer_active = False
+            self.engine.iniciar_trabajo(90) # Reset a estado base
+            self.engine.state = "IDLE"
+            self.query_one("#lbl_time").update("90:00")
+            self.query_one("#lbl_status").update("READY")
+            self.progress_bar.progress = 0
 
 class StudyApp(App):
     CSS_PATH = [
@@ -135,6 +225,8 @@ class StudyApp(App):
                 with TabPane("To-Do List", id="tab_todo"):
                     yield ToDoWidget()
 
+                with TabPane("Ultradian Timer", id="tab_pomodoro"):
+                    yield PomodoroWidget()
     def on_mount(self):
         datos = logic.cargar_datos_globales()
         self.materias = datos["materias"]

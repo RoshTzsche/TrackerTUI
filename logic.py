@@ -24,7 +24,66 @@ class Materia:
             "horas_acumuladas": self.horas_acumuladas
         }
 
-# --- FUNCIONES DE PERSISTENCIA UNIFICADA ---
+# --- NUEVA CLASE: GESTOR ULTRADIANO (Aquí estaba el error) ---
+class GestorUltradiano:
+    """
+    Motor lógico para ciclos de trabajo basados en Ritmos Ultradianos.
+    Ratio de descanso: ~16.6% del tiempo trabajado (90m -> 15m).
+    """
+    WORK_MIN = 90
+    WORK_MAX = 112
+    
+    def __init__(self):
+        self.state = "IDLE" # IDLE, WORK, BREAK
+        self.target_seconds = 90 * 60 # Default 90 min
+        self.current_seconds = self.target_seconds
+        self.elapsed_work = 0 # Tiempo real trabajado (para calcular break dinámico)
+    
+    def iniciar_trabajo(self, minutos=90):
+        self.state = "WORK"
+        self.target_seconds = minutos * 60
+        self.current_seconds = self.target_seconds
+        self.elapsed_work = 0
+        
+    def tick(self):
+        """Avanza el reloj un segundo. Retorna True si el ciclo terminó."""
+        if self.state == "IDLE": return False
+        
+        if self.current_seconds > 0:
+            self.current_seconds -= 1
+            if self.state == "WORK":
+                self.elapsed_work += 1
+            return False
+        else:
+            return True # Tiempo agotado
+
+    def calcular_descanso_dinamico(self):
+        """
+        Calcula el descanso basado en el esfuerzo real.
+        Regla: 1 minuto de descanso por cada 6 minutos de trabajo.
+        Ej: 90m -> 15m | 45m -> 7.5m
+        """
+        segundos_descanso = int(self.elapsed_work / 6)
+        # Mínimo 2 minutos para que valga la pena
+        return max(segundos_descanso, 120)
+
+    def iniciar_descanso(self):
+        self.state = "BREAK"
+        self.target_seconds = self.calcular_descanso_dinamico()
+        self.current_seconds = self.target_seconds
+
+    def formatear_tiempo(self):
+        mins, secs = divmod(self.current_seconds, 60)
+        return f"{mins:02d}:{secs:02d}"
+    
+    def obtener_progreso(self):
+        if self.target_seconds == 0: return 0
+        # Invertimos para que la barra se llene o vacíe según prefieras
+        total = self.target_seconds
+        restante = self.current_seconds
+        return ((total - restante) / total) * 100
+
+# --- FUNCIONES DE PERSISTENCIA ---
 
 def cargar_datos_globales():
     """Carga materias y tareas del archivo JSON de forma segura."""
