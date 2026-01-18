@@ -102,6 +102,9 @@ Tab.-active {
     border: round $secondary;
     padding: 1;
     background: $surface;
+    overflow-x: auto;
+    scrollbar-background: $surface;
+    scrollbar-color: $surface;
 }
 
 MateriaWidget {
@@ -220,7 +223,8 @@ DashboardView {
     layout: horizontal; /* Dos columnas principales */
     height: 100%;
     background: $background;
-    display: none; /* Oculto por defecto */
+    display: none;
+    overflow-y: auto;
 }
 
 /* Columna Izquierda: Tracker */
@@ -238,27 +242,116 @@ DashboardView {
     width: 50%;
     height: 100%;
     layout: vertical;
+    scrollbar-background: $surface;
+    scrollbar-color: $surface;
 }
 
 /* Panel Pomodoro en Dashboard */
 #dash_pomodoro {
-    height: 40%; /* Menos altura para el reloj */
+    height: auto;       /* Dejar que crezca según su contenido */
+    min-height: 20%;     /* Altura mínima segura */
     border: round $secondary;
-    margin-bottom: 1;
+    margin-bottom: 0;
     background: $surface;
     padding: 1;
 }
 
-/* Panel ToDo en Dashboard */
-#dash_todo {
-    height: 60%; /* Más espacio para la lista */
+	/* Panel ToDo en Dashboard */
+	#dash_todo {
+		min-height:30;
+	    height: 40%;
+	    border: round $accent;
+	    background: $surface;
+	    padding: 1;
+	    margin-bottom: 1;
+	}
+
+
+	/* Panel del Reloj Digital */
+	.clock-panel {
+	    background: $surface; /* Un poco más oscuro si tu tema lo permite */
+	    border: ascii $primary;
+	    height: 6;
+	    align: center middle;
+	    margin-bottom: 0;
+	    padding: 1;
+	}
+
+		#lbl_time {
+    text-style: bold;
+    color: $accent;
+    content-align: center middle;
+    width: 100%;
+}
+
+#lbl_status {
+    color: $secondary;
+    text-style: italic;
+    content-align: center middle;
+    width: 100%;
+}
+
+/* Grid de Botones 2x2 para que se vean grandes y ordenados */
+.timer-grid {
+    layout: grid;
+    grid-size: 3 1;
+    grid-gutter: 1; /* Espacio entre botones */
+    margin-top: 1;
+    height: 6;
+}
+
+.btn-pomo {
+    width: 100%; /* Ocupar toda la celda del grid */
+    height: 3;   /* Más altos para ser clicleables fácilmente */
+    border: none;
+    text-style: bold;
+    padding: 1;
+}
+
+/* Estilos para el Footer con ASCII */
+#dash_footer {
+    height: 30%; /* El espacio restante */
+    align: center middle; /* Centrar el arte */
+    border-top: solid $secondary; /* Opcional: línea divisoria */
+    padding-top: 1;
+}
+
+.ascii-art-text {
+    color: $accent; /* O usa un gradiente si usas textual-canvas, pero esto basta */
+    text-align: center;
+}
+
+.sidebar-footer {
+    height: 1fr; /* Ocupa el espacio restante */
+    align: center bottom; /* Empuja el contenido al fondo */
+    padding-bottom: 1;
+}
+
+.ascii-art {
+    color: $accent; /* Se verá genial con Pywal */
+    text-align: center;
+    text-style: bold;
+}
+
+.ascii-art-bottom {
+    width: 100%;
+    text-align: center;
+    color: $accent;
+    margin-top: 2;
+    margin-bottom: 2;
+    text-style: bold;
+}
+/* En estilo.css - Agrega esto al final o cerca de la sección Dashboard */
+
+/* La caja contenedora del ASCII en el Dashboard */
+.ascii-dashboard-box {
+    height: auto;           
+    width: 100%;           
     border: round $accent;
     background: $surface;
-    padding: 1;
+    margin-top: 1;      
+    margin-bottom: 1;  
+    padding: 1;       
+    align: center middle; 
 }
 
-/* Ajuste de botones Pomodoro para espacios pequeños */
-.btn-pomo {
-    min-width: 8;
-    margin: 0 1;
-}

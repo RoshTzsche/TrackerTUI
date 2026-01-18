@@ -6,7 +6,41 @@ from textual.message import Message
 import logic
 
 # --- COMPONENTES VISUALES ---
+MY_ASCII_ART = r"""
+[][][]][][][]]{[]
+[]
+[]
+[
+][
+][
+]
+[]
+[]
+[
+]
+[
+]
 
+[
+]
+[
+]
+[
+]
+[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+"""
+SIDEBAR_ART = r"""
+   .   .
+    . .
+  .  .  .
+   .   .
+  _______
+ /_  _   \
+|  \/  o  |
+|         |
+ \_______/ 
+   ROSH
+"""
 class BtopBar(Static):
     """Barra de progreso reactiva."""
     progress = reactive(0.0)
@@ -34,7 +68,7 @@ class BtopBar(Static):
 class Sidebar(Static):
     """Panel lateral de estadísticas."""
     def compose(self) -> ComposeResult:
-        yield Label(":: DASHBOARD ::", classes="sidebar-title")
+        yield Label("::::::: DASHBOARD :::::::", classes="sidebar-title")
         yield Label("Meta Semanal:", classes="stat-label")
         self.lbl_meta = Label("0.0", classes="stat-value")
         yield self.lbl_meta       
@@ -45,6 +79,9 @@ class Sidebar(Static):
         self.bar_global = BtopBar(classes="btop-bar-global")
         yield self.bar_global
         
+        #ASCII art
+        with Container(classes="sidebar-footer"):
+            yield Label(SIDEBAR_ART, classes="ascii-art") 
         # BOTONES DE CONTROL
         yield Button("Cambiar Vista ⧉", id="btn_view_toggle", variant="primary")
         yield Button("Reiniciar Semana", id="btn_reset", variant="error")
@@ -141,23 +178,25 @@ class ToDoWidget(Static):
 
 class PomodoroWidget(Static):
     def compose(self) -> ComposeResult:
-        # Usamos la instancia GLOBAL para compartir estado entre vistas
         self.engine = logic.motor_ultradiano_global
         self.timer_active = False 
 
-        yield Label(":: FLUJO ULTRADIANO ::", classes="sidebar-title")
-        yield Container(
-            Label("IDLE", id="lbl_status"),
-            Label("90:00", id="lbl_time"),
-            classes="timer-container"
-        )
+        yield Label(":::::: FLUJO ULTRADIANO ::::::", classes="sidebar-title")
+        
+        # 1. Contenedor del Reloj "Digital"
+        with Container(classes="clock-panel"):
+            yield Label("IDLE", id="lbl_status")
+            yield Label("90:00", id="lbl_time")
+        
         self.progress_bar = BtopBar(classes="barra-materia")
         yield self.progress_bar
-        with Horizontal(classes="timer-controls"):
-            yield Button("Go(90m)", id="btn_start_90", variant="success", classes="btn-pomo")
-            yield Button("II/▶", id="btn_pause", variant="primary", classes="btn-pomo")
-            yield Button("Break", id="btn_break", variant="warning", classes="btn-pomo")
-            yield Button("Rst", id="btn_reset", variant="error", classes="btn-pomo")
+        
+        # 2. Grid para los botones (Mejor que Horizontal para alineación)
+        with Grid(classes="timer-grid"):
+            yield Button("WORK (90m)", id="btn_start_90", variant="success", classes="btn-pomo")
+            yield Button("PAUSE", id="btn_pause", variant="primary", classes="btn-pomo")
+            yield Button("BREAK", id="btn_break", variant="warning", classes="btn-pomo")
+
 
     def on_mount(self):
         self.set_interval(1.0, self.update_timer)
@@ -207,10 +246,19 @@ class DashboardView(Container):
         yield TrackerPanel(id="dash_tracker")
         
         # Columna Derecha: Pomodoro (Arriba) y ToDo (Abajo)
-        with Container(id="dash_right_col"):
+        with VerticalScroll(id="dash_right_col"):
             yield PomodoroWidget(id="dash_pomodoro")
             yield ToDoWidget(id="dash_todo")
-
+            with Container(classes="ascii-dashboard-box"):
+                yield Label(MY_ASCII_ART, classes="ascii-art-text")
+""" 
+  yield ToDoWidget(id="dash_todo")
+        # Columna Derecha: Pomodoro (Arriba) y ToDo (Abajo)
+        with VerticalScroll(id="dash_right_col"):
+            yield PomodoroWidget(id="dash_pomodoro")
+            yield TrackerPanel(id="dash_tracker")
+            yield Label(MY_ASCII_ART, classes="ascii-art-text")
+"""
 # --- APP PRINCIPAL ---
 class StudyApp(App):
     CSS_PATH = ["/home/ateniense/.cache/wal/textual.tcss", "estilo.css"]
