@@ -1,0 +1,100 @@
+
+/*@import /home/ateniense/.cache/wal/color.css 
+*/
+
+Screen {
+    layout: vertical;
+    background: $surface; 
+}
+
+/* --- LAYOUT --- */
+#main_layout {
+    layout: horizontal;
+    height: 100%;
+}
+
+/* --- SIDEBAR IZQUIERDA --- */
+Sidebar {
+    width: 40%;
+    dock: left;
+    background: $surface-darken-1;
+    border-right: ascii $primary; /* Borde ASCII (|) */
+    padding: 1;
+    height: 100%;
+}
+
+.sidebar-title {
+    text-align: center;
+    text-style: bold;
+    color: $accent;
+    align-horizontal: center;
+    border-bottom: ascii $accent; /* Subrayado ASCII (-) */
+    margin:1 3 1 3;
+}
+
+.stat-label {
+    color: $text-muted;
+    margin-top: 1;
+}
+
+.stat-value {
+    color: $text;
+    text-style: bold;
+}
+
+#btn_reset {
+	margin: 3 5;
+	
+	color:red; 
+}
+
+/* --- LISTA DERECHA --- */
+#lista_container {
+    width: 100%;
+    padding: 1;
+}
+
+/* --- FILA DE MATERIA --- */
+MateriaWidget {
+    layout: horizontal;
+    margin-bottom: 1;
+    border: ascii $secondary; /* Caja ASCII cuadrada */
+    padding: 0 1; /* Espacio interno horizontal */
+}
+
+.nombre-materia {
+    width: 30%;
+    height: 100%;
+    content-align: left middle;
+    color: $text;
+    align-vertical: middle;
+}
+
+#barraindividual {
+    width: 1fr;
+    height: 100%;
+    align-vertical: middle;
+
+}
+
+
+/* Forzamos el color de la barra llena */
+ProgressBar > .bar--bar {
+    color: $success; 
+    background: $success;
+}
+
+.stats-materia {
+    width: 30%;
+    height: 100%;
+    content-align: center middle;
+}
+
+/* BOTÓN DE ACCIÓN (+1h) */
+#btn_add {
+    min-width: 6;
+
+    background: $success;
+    color: black;
+    padding: 1;
+}
