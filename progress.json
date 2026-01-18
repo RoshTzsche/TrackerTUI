@@ -1,0 +1,59 @@
+{
+    "materias": [
+        {
+            "nombre": "Analisis matematico",
+            "meta": 4.0,
+            "horas_acumuladas": 4.0
+        },
+        {
+            "nombre": "ML - SPV",
+            "meta": 4.0,
+            "horas_acumuladas": 4.0
+        },
+        {
+            "nombre": "Termodinamica quimica",
+            "meta": 4.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "EDO",
+            "meta": 2.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Python",
+            "meta": 2.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Electronica integrada",
+            "meta": 2.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Probabilidad",
+            "meta": 2.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Lab. Termodinamica",
+            "meta": 1.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Pensamiento H.",
+            "meta": 1.0,
+            "horas_acumuladas": 0.0
+        }
+    ],
+    "todos": [
+        {
+            "text": "hjgb",
+            "done": true
+        },
+        {
+            "text": "jbikiv",
+            "done": true
+        }
+    ]
+}

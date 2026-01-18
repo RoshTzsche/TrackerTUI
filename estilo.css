@@ -1,24 +1,37 @@
-
-/*@import /home/ateniense/.cache/wal/color.css 
-*/
+/* estilo.css - Versión Final Corregida */
 
 Screen {
     layout: vertical;
-    background: $surface; 
+    background: $background;
+    color: $foreground;
 }
 
-/* --- LAYOUT --- */
+/* --- CRÍTICO: FORZAR EXPANSIÓN DE PESTAÑAS --- */
+TabbedContent {
+    height: 1fr; /* Ocupa todo el espacio restante bajo el Header/Footer */
+}
+
+ContentSwitcher {
+    height: 1fr; /* El contenedor interno de las pestañas también debe estirarse */
+}
+
+TabPane {
+    height: 1fr; /* Cada panel individual hereda la altura completa */
+}
+
+/* --- LAYOUT PRINCIPAL --- */
 #main_layout {
-    layout: horizontal;
     height: 100%;
+    margin: 0 1; 
 }
 
-/* --- SIDEBAR IZQUIERDA --- */
+/* --- SIDEBAR (Panel Lateral) --- */
 Sidebar {
-    width: 40%;
+    width: 30;
     dock: left;
-    background: $surface-darken-1;
-    border-right: ascii $primary; /* Borde ASCII (|) */
+    background: $surface;
+    border: round $primary; /* Borde redondeado estilo Btop */
+    margin-right: 1;
     padding: 1;
     height: 100%;
 }
@@ -27,74 +40,128 @@ Sidebar {
     text-align: center;
     text-style: bold;
     color: $accent;
-    align-horizontal: center;
-    border-bottom: ascii $accent; /* Subrayado ASCII (-) */
-    margin:1 3 1 3;
+    border-bottom: heavy $secondary;
+    margin-bottom: 1;
 }
 
 .stat-label {
-    color: $text-muted;
+    color: $secondary; 
     margin-top: 1;
 }
 
 .stat-value {
-    color: $text;
+    color: $foreground;
     text-style: bold;
 }
 
+/* Barra de progreso global personalizada */
+.btop-bar-global {
+    height: 1;
+    color: $success;
+    margin-bottom: 2;
+}
+
 #btn_reset {
-	margin: 3 5;
-	
-	color:red; 
-}
-
-/* --- LISTA DERECHA --- */
-#lista_container {
     width: 100%;
-    padding: 1;
+    border: none;
+    background: $error; /* Usamos $error (rojo) para acciones destructivas */
+    color: $background;
+    text-style: bold;
+    margin-top: 2;
 }
 
-/* --- FILA DE MATERIA --- */
+/* --- SISTEMA DE PESTAÑAS (Tabs) --- */
+Tabs {
+    background: $background;
+    dock: top;
+    margin-bottom: 1;
+    color: red;
+}
+
+Tab {
+    padding: 10 20;
+    height: 10;
+    /* ¡AQUÍ ESTÁ LA SOLUCIÓN! */
+    /* Definimos el color base para pestañas inactivas */
+    color: $primary; 
+    text-style: bold;
+}
+
+/* Estado Hover (Opcional: para feedback visual al pasar el mouse) */
+Tab:hover {
+    color: $foreground;
+}
+
+/* Estado Activo (Pestaña seleccionada) */
+Tab.-active {
+    color: $accent;
+    text-style: bold underline reverse; /* 'reverse' resalta el fondo del texto */
+}
+/* --- CONTENIDO: TRACKER DE MATERIAS --- */
+#lista_container {
+    height: 100%;
+    border: round $secondary;
+    padding: 1;
+    background: $surface;
+}
+
 MateriaWidget {
     layout: horizontal;
     margin-bottom: 1;
-    border: ascii $secondary; /* Caja ASCII cuadrada */
-    padding: 0 1; /* Espacio interno horizontal */
+    padding: 1;
+    border-bottom: solid ansi_bright_black; 
 }
 
 .nombre-materia {
-    width: 30%;
-    height: 100%;
+    width: 30;
     content-align: left middle;
-    color: $text;
-    align-vertical: middle;
+    color: $primary;
+    text-style: bold;
 }
 
-#barraindividual {
-    width: 1fr;
-    height: 100%;
-    align-vertical: middle;
-
-}
-
-
-/* Forzamos el color de la barra llena */
-ProgressBar > .bar--bar {
-    color: $success; 
-    background: $success;
+.barra-materia {
+    width: 1fr; /* Ocupa todo el espacio flexible */
+    content-align: center middle;
+    color: $secondary;
 }
 
 .stats-materia {
-    width: 30%;
-    height: 100%;
-    content-align: center middle;
+    content-align: right middle;
+    color: $foreground;
+	margin: 0 2;
 }
 
-/* BOTÓN DE ACCIÓN (+1h) */
-#btn_add {
-    min-width: 6;
+.btn-small {
+    min-width: 5;
+    background: $secondary;
+    color: $background;
+    border: none;
+    text-style: bold;
+}
 
-    background: $success;
-    color: black;
+/* --- CONTENIDO: TO-DO LIST --- */
+ToDoWidget {
+    layout: vertical;
+    background: $surface;
+    border: round $accent;
     padding: 1;
+    height: 100%;
+}
+
+#list_tasks {
+    height: 1fr;
+    /* CORRECCIÓN: Reemplazado $link-color por $accent */
+    border: heavy $accent; 
+    background: $background;
+    margin-bottom: 1;
+}
+
+ListItem {
+    padding: 1;
+}
+
+#inp_task {
+    dock: bottom;
+    border: round $primary;
+    background: $background;
 }

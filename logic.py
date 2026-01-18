@@ -1,5 +1,4 @@
 # logic.py
-# logic.py
 import json
 import os
 
@@ -25,8 +24,44 @@ class Materia:
             "horas_acumuladas": self.horas_acumuladas
         }
 
+# --- FUNCIONES DE PERSISTENCIA UNIFICADA ---
+
+def cargar_datos_globales():
+    """Carga materias y tareas del archivo JSON de forma segura."""
+    if not os.path.exists(FILE_NAME):
+        return {"materias": _datos_por_defecto(), "todos": []}
+
+    try:
+        with open(FILE_NAME, 'r') as f:
+            data = json.load(f)
+            
+            # Migración: Si el archivo viejo era una lista (solo materias)
+            if isinstance(data, list):
+                return {
+                    "materias": [Materia(d['nombre'], d['meta'], d.get('horas_acumuladas', 0)) for d in data],
+                    "todos": []
+                }
+            
+            # Formato nuevo (Diccionario completo)
+            raw_materias = data.get("materias", [])
+            materias = [Materia(d['nombre'], d['meta'], d.get('horas_acumuladas', 0)) for d in raw_materias]
+            todos = data.get("todos", [])
+            return {"materias": materias, "todos": todos}
+            
+    except Exception:
+        # Si falla, backup de emergencia con datos default
+        return {"materias": _datos_por_defecto(), "todos": []}
+
+def guardar_datos_globales(materias, todos):
+    """Guarda el estado completo del sistema."""
+    data = {
+        "materias": [m.to_dict() for m in materias],
+        "todos": todos 
+    }
+    with open(FILE_NAME, 'w') as f:
+        json.dump(data, f, indent=4)
+
 def obtener_estadisticas_globales(materias):
-    """Calcula totales para el dashboard."""
     total_horas = sum(m.horas_acumuladas for m in materias)
     total_meta = sum(m.meta_semanal for m in materias)
     progreso = (total_horas / total_meta * 100) if total_meta > 0 else 0
@@ -40,23 +75,7 @@ def reiniciar_semana(materias):
     for m in materias:
         m.horas_acumuladas = 0.0
 
-def cargar_datos():
-    if os.path.exists(FILE_NAME):
-        try:
-            with open(FILE_NAME, 'r') as f:
-                data = json.load(f)
-                return [Materia(d['nombre'], d['meta'], d.get('horas_acumuladas', 0)) for d in data]
-        except Exception:
-            return _datos_por_defecto()
-    return _datos_por_defecto()
-
-def guardar_datos(materias):
-    data = [m.to_dict() for m in materias]
-    with open(FILE_NAME, 'w') as f:
-        json.dump(data, f, indent=4)
-
 def _datos_por_defecto():
-    # Tus datos originales del txt
     raw = [
         ("Analisis matematico", 4), ("ML - SPV", 4), ("Termodinamica quimica", 4),
         ("EDO", 2), ("Python", 2), ("Electronica integrada", 2), 
