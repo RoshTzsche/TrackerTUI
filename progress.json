@@ -13,7 +13,7 @@
         {
             "nombre": "Termodinamica quimica",
             "meta": 4.0,
-            "horas_acumuladas": 0.0
+            "horas_acumuladas": 1.0
         },
         {
             "nombre": "EDO",
@@ -33,7 +33,7 @@
         {
             "nombre": "Probabilidad",
             "meta": 2.0,
-            "horas_acumuladas": 0.0
+            "horas_acumuladas": 2.0
         },
         {
             "nombre": "Lab. Termodinamica",
@@ -44,7 +44,274 @@
             "nombre": "Pensamiento H.",
             "meta": 1.0,
             "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "Analisis",
+            "meta": 2.0,
+            "horas_acumuladas": 0.0
+        },
+        {
+            "nombre": "aaa",
+            "meta": 1.0,
+            "horas_acumuladas": 0.0
         }
     ],
-    "todos": []
+    "todos": [
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        },
+        {
+            "text": "Muestra de celulas",
+            "done": false
+        },
+        {
+            "text": "sigma algebra, que es?",
+            "done": false
+        },
+        {
+            "text": "Codigo martha",
+            "done": true
+        },
+        {
+            "text": "hmm (markov)",
+            "done": false
+        },
+        {
+            "text": "tarea edo",
+            "done": false
+        },
+        {
+            "text": "demostracion de propiedades de limite",
+            "done": false
+        },
+        {
+            "text": "reapasar termodinamica, leyes fundamentales, y energia interna",
+            "done": false
+        },
+        {
+            "text": "tarea analisis",
+            "done": false
+        }
+    ]
 }

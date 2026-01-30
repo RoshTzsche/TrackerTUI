@@ -47,7 +47,7 @@ Sidebar {
 #btn_reset {
     width: 100%;
     border: none;
-    background: $error; /* Usamos $error (rojo) para acciones destructivas */
+    background: $error; 
     color: $background;
     text-style: bold;
     margin-top: 2;
@@ -112,6 +112,8 @@ MateriaWidget {
     margin-bottom: 1;
     padding: 1;
     border-bottom: solid ansi_bright_black;
+ scrollbar-background: $surface;
+    scrollbar-color: $surface;
 }
 
 .nombre-materia {
@@ -141,17 +143,104 @@ MateriaWidget {
     text-style: bold;
 }
 
+#panel_crear_materia {
+    layout: horizontal;
+    height: 3;
+    background: $surface;
+    border-bottom: solid $secondary;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+#inp_nueva_materia {
+    width: 1fr;
+    margin-right: 1;
+}
+
+#inp_nueva_meta {
+    width: 10; /* Pequeño para el número */
+    margin-right: 1;
+}
+
+#btn_crear_materia {
+    min-width: 10;
+    background: $success;
+    color: $background;
+    text-style: bold;
+}
+
+/* --- BOTONES MATERIA WIDGET --- */
+.btn-minus {
+    min-width: 5;
+    background: $warning; /* Amarillo/Naranja para restar */
+    color: $background;
+    border: none;
+    text-style: bold;
+    margin-right: 1;
+}
+
+.btn-trash {
+    min-width: 3;
+    background: transparent;
+    color: $error;
+    border: none;
+    text-style: bold;
+    margin-left: 1;
+}
+.btn-trash:hover {
+    background: $error;
+    color: $background;
+}
+
+/* --- MODAL DE CONFIRMACIÓN (SCREEN) --- */
+ConfirmScreen {
+    align: center middle;
+    background: 50% $background; /* Fondo semitransparente */
+}
+
+#dialog {
+    grid-size: 2;
+    grid-gutter: 1 2;
+    grid-rows: 1fr 3;
+    padding: 0 1;
+    width: 60;
+    height: 11;
+    border: thick $error;
+    background: $surface;
+}
+
+#question {
+    column-span: 2;
+    height: 1fr;
+    width: 1fr;
+    content-align: center middle;
+    text-style: bold;
+    color: $foreground;
+}
+
+#btn_confirm_delete {
+    width: 100%;
+    background: $error;
+    color: $background;
+}
+
+#btn_cancel_delete {
+    width: 100%;
+    background: $primary;
+    color: $background;
+}
+
 /* --- CONTENIDO: TO-DO LIST --- */
 ToDoWidget {
     layout: vertical;
     background: $surface;
     border: round $accent;
     padding: 1;
-    height: 100%;
+    height: 20;
 }
 
 ListItem {
-    padding: 0; /* Quitamos padding del item para que el contenedor controle todo */
+    padding: 0;
     background: $background;
     height: auto;
 }
@@ -225,6 +314,9 @@ DashboardView {
     background: $background;
     display: none;
     overflow-y: auto;
+scrollbar-background: $surface;
+    scrollbar-color: $surface;
+
 }
 
 /* Columna Izquierda: Tracker */
@@ -235,6 +327,9 @@ DashboardView {
     margin-right: 1;
     background: $surface;
     padding: 1;
+scrollbar-background: $surface;
+    scrollbar-color: $surface;
+
 }
 
 /* Columna Derecha: Contenedor para Pomodoro y ToDo */
@@ -248,8 +343,7 @@ DashboardView {
 
 /* Panel Pomodoro en Dashboard */
 #dash_pomodoro {
-    height: auto;       /* Dejar que crezca según su contenido */
-    min-height: 20%;     /* Altura mínima segura */
+    height: 17; 
     border: round $secondary;
     margin-bottom: 0;
     background: $surface;
@@ -258,8 +352,7 @@ DashboardView {
 
 	/* Panel ToDo en Dashboard */
 	#dash_todo {
-		min-height:30;
-	    height: 40%;
+	    height: 31;
 	    border: round $accent;
 	    background: $surface;
 	    padding: 1;
@@ -274,7 +367,7 @@ DashboardView {
 	    height: 6;
 	    align: center middle;
 	    margin-bottom: 0;
-	    padding: 1;
+	    padding: 0;
 	}
 
 		#lbl_time {
@@ -296,7 +389,7 @@ DashboardView {
     layout: grid;
     grid-size: 3 1;
     grid-gutter: 1; /* Espacio entre botones */
-    margin-top: 1;
+    margin-top: 0;
     height: 6;
 }
 

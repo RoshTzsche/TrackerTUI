@@ -23,8 +23,11 @@ class Materia:
             "meta": self.meta_semanal,
             "horas_acumuladas": self.horas_acumuladas
         }
+    def restar_sesion(self, horas):
+        self.horas_acumuladas -= horas
+        if self.horas_acumuladas < 0:
+            self.horas_acumuladas = 0.0
 
-# --- NUEVA CLASE: GESTOR ULTRADIANO (Aquí estaba el error) ---
 class GestorUltradiano:
     """
     Motor lógico para ciclos de trabajo basados en Ritmos Ultradianos.
@@ -142,6 +145,24 @@ def _datos_por_defecto():
     ]
     return [Materia(n, m) for n, m in raw]
 
-# --- INSTANCIA GLOBAL (SINGLETON) ---
-# Esto asegura que el timer sea el mismo en todas las vistas
 motor_ultradiano_global = GestorUltradiano()
+
+def crear_materia(nombre, meta):
+    """
+    Crea una materia, la integra en el estado global y persiste los cambios.
+    """
+    # 1. Cargar el estado actual para no perder tareas (todos) ni otras materias
+    datos = cargar_datos_globales()
+    materias = datos["materias"]
+    todos = datos["todos"]
+
+    # 2. Validación de duplicados (evita errores en las estadísticas)
+    if any(m.nombre.lower() == nombre.lower() for m in materias):
+        return False, "La materia ya existe."
+
+    # 3. Creación y persistencia
+    nueva_materia = Materia(nombre, meta)
+    materias.append(nueva_materia)
+    guardar_datos_globales(materias, todos)
+    
+    return True, nueva_materia

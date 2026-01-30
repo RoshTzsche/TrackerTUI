@@ -3,6 +3,7 @@ from textual.containers import Horizontal, VerticalScroll, Container, Grid
 from textual.widgets import Header, Footer, Button, Label, Static, TabbedContent, TabPane, Input, ListView, ListItem, Checkbox
 from textual.reactive import reactive
 from textual.message import Message
+from textual.screen import Screen
 import logic
 
 # --- COMPONENTES VISUALES ---
@@ -44,8 +45,7 @@ SIDEBAR_ART = r"""
 class BtopBar(Static):
     """Barra de progreso reactiva."""
     progress = reactive(0.0)
-    BARS = [" ", " ", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-
+    BARS = ["⠀", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"]
     def watch_progress(self, val):
         self.remove_class("p-low", "p-med", "p-high")
         if val < 50: self.add_class("p-low")
@@ -59,7 +59,7 @@ class BtopBar(Static):
         total = width
         filled = int(total * p)
         remainder = (total * p) - filled
-        bar = "█" * filled
+        bar = "⣿" * filled
         if filled < total:
             idx = int(remainder * (len(self.BARS) - 1))
             bar += self.BARS[idx]
@@ -91,8 +91,17 @@ class Sidebar(Static):
         self.lbl_meta.update(f"{stats['total_meta']:.1f} h")
         self.bar_global.progress = stats['progreso_general']
 
+
 class MateriaWidget(Static):
     horas = reactive(0.0)
+
+    class EliminarSolicitud(Message):
+        """Mensaje para pedir al padre que me borre."""
+        def __init__(self, materia_obj):
+            self.materia_obj = materia_obj
+            super().__init__()
+
+    class Cambio(Message): pass
 
     def __init__(self, materia_obj):
         super().__init__()
@@ -100,13 +109,24 @@ class MateriaWidget(Static):
         self.horas = materia_obj.horas_acumuladas
 
     def compose(self) -> ComposeResult:
+        # Layout: Nombre | Bar | - | Stats | + | Trash
         yield Label(f"{self.materia.nombre[:15]:<15}", classes="nombre-materia")
+        
         self.progress_bar = BtopBar(classes="barra-materia")
         self.progress_bar.progress = self.materia.obtener_progreso()
         yield self.progress_bar
+        
+        # Botón Restar
+        yield Button("-", id="btn_sub", classes="btn-minus")
+        
         self.lbl_stats = Label(f"{self.horas:.1f}/{self.materia.meta_semanal}h", classes="stats-materia")
         yield self.lbl_stats
+        
+        # Botón Sumar
         yield Button("+", id="btn_add", classes="btn-small")
+        
+        # Botón Eliminar
+        yield Button("X", id="btn_del", classes="btn-trash")
 
     def watch_horas(self, val):
         self.materia.horas_acumuladas = val
@@ -114,22 +134,79 @@ class MateriaWidget(Static):
             self.progress_bar.progress = self.materia.obtener_progreso()
             self.lbl_stats.update(f"{val:.1f}/{self.materia.meta_semanal}h")
 
-    class Cambio(Message): pass
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn_add":
-            self.horas += 1.0
+            self.materia.registrar_sesion(1.0) 
             self.post_message(self.Cambio())
+        elif event.button.id == "btn_sub":
+            self.materia.restar_sesion(1.0) 
+            self.horas = self.materia.horas_acumuladas
+            self.post_message(self.Cambio())
+        elif event.button.id == "btn_del":
+            # Enviar mensaje al padre (TrackerPanel) para gestionar borrado
+            self.post_message(self.EliminarSolicitud(self.materia))
 
 class TrackerPanel(Static):
-    """Panel encapsulado para la lista de materias."""
+    """Panel para la lista de materias con creación dinámica."""
+    
     def compose(self) -> ComposeResult:
         yield Label(":: TRACKER ::", classes="sidebar-title")
-        yield VerticalScroll(id="lista_container")
+        
+        with VerticalScroll():   
+            yield Container(id="lista_container")
+            with Container(id="panel_crear_materia"):
+                yield Input(placeholder="Nueva Materia...", id="inp_nueva_materia")
+                yield Input(placeholder="Meta(h)", id="inp_nueva_meta", type="number")
+                yield Button("Añadir", id="btn_crear_materia")
+       
+    def on_button_pressed(self, event: Button.Pressed):
+        if event.button.id == "btn_crear_materia":
+            self.crear_materia_ui()
+
+    def on_input_submitted(self, event: Input.Submitted):
+        # Permitir crear dando Enter en los inputs
+        self.crear_materia_ui()
+    def crear_materia_ui(self):
+        nombre = self.query_one("#inp_nueva_materia", Input).value.strip()
+        meta_str = self.query_one("#inp_nueva_meta", Input).value.strip()
+    
+        if nombre and meta_str:
+            try:
+                meta = float(meta_str)
+            # 1. Llamada a la lógica persistente
+                exito, resultado = logic.crear_materia(nombre, meta)
+            
+                if exito:
+                # 2. Sincronizar TODA la app (Tabs y Dashboard)
+                    self.app.cargar_datos_y_refrescar() 
+                
+                # 3. Limpiar inputs y notificar
+                    self.query_one("#inp_nueva_materia", Input).value = ""
+                    self.query_one("#inp_nueva_meta", Input).value = ""
+                    self.app.notify(f"Materia '{nombre}' añadida")
+                else:
+                    self.app.notify(resultado, severity="error")
+                
+            except ValueError:
+                self.app.notify("La meta debe ser un número", severity="error")
+        # Manejar solicitud de borrado que viene de un hijo (MateriaWidget)
+    def on_materia_widget_eliminar_solicitud(self, message: MateriaWidget.EliminarSolicitud):
+        materia_a_borrar = message.materia_obj
+        
+        # Definir qué hacer si el usuario dice SI
+        def check_borrado(confirmado: bool):
+            if confirmado:
+                self.app.materias.remove(materia_a_borrar)
+                self.app.cargar_datos_y_refrescar() # Refresca todos los paneles
+                self.app.guardar_todo()
+                self.app.notify(f"Eliminada: {materia_a_borrar.nombre}")
+
+        # Mostrar pantalla de confirmación
+        self.app.push_screen(ConfirmScreen(), check_borrado)
 
     def recargar_materias(self, materias):
         container = self.query_one("#lista_container")
-        container.remove_children() # Limpiar lista anterior
+        container.remove_children() 
         for m in materias:
             container.mount(MateriaWidget(m))
 
@@ -237,6 +314,22 @@ class PomodoroWidget(Static):
             self.timer_active = False
             self.engine.iniciar_trabajo(90)
             self.engine.state = "IDLE"
+
+class ConfirmScreen(Screen):
+    """Modal para confirmar borrado."""
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Label("¿Estás seguro de ELIMINAR esta materia?\nEsta acción no se puede deshacer.", id="question"),
+            Button("Cancelar", variant="primary", id="btn_cancel_delete"),
+            Button("ELIMINAR", variant="error", id="btn_confirm_delete"),
+            id="dialog"
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "btn_confirm_delete":
+            self.dismiss(True) # Retorna True si confirmó
+        else:
+            self.dismiss(False)
 
 # --- VISTA DASHBOARD (REJILLA) ---
 class DashboardView(Container):
