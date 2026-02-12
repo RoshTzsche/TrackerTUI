@@ -189,6 +189,7 @@ class TrackerPanel(Static):
                 
             except ValueError:
                 self.app.notify("La meta debe ser un número", severity="error")
+
         # Manejar solicitud de borrado que viene de un hijo (MateriaWidget)
     def on_materia_widget_eliminar_solicitud(self, message: MateriaWidget.EliminarSolicitud):
         materia_a_borrar = message.materia_obj
