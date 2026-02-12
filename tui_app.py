@@ -1,6 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll, Container, Grid
-from textual.widgets import Header, Footer, Button, Label, Static, TabbedContent, TabPane, Input, ListView, ListItem, Checkbox
+from textual.widgets import Header, Footer, Button, Label, Static, TabbedContent, TabPane, Input, ListView, ListItem, Checkbox, Tree 
 from textual.reactive import reactive
 from textual.message import Message
 from textual.screen import Screen
@@ -8,27 +8,26 @@ import logic
 
 # --- COMPONENTES VISUALES ---
 MY_ASCII_ART = r"""
-[][][]][][][]]{[]
-[]
-[]
-[
-][
-][
-]
-[]
-[]
-[
-]
-[
-]
 
-[
-]
-[
-]
-[
-]
-[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+             .........
+            .'------.' |       Plug and Play
+           | .-----. | |
+           | |     | | |
+         __| |     | | |;. _______________
+        /  |*`-----'.|.' `;              //
+       /   `---------' .;'              //
+ /|   /  .''''////////;'               //
+|=|  .../ ######### /;/               //|
+|/  /  / ######### //                //||
+   /   `-----------'                // ||
+  /________________________________//| ||
+  `--------------------------------' | ||
+   : | ||      | || |__LL__|| ||     | ||
+   : | ||      | ||         | ||     `""'
+   n | ||      `""'         | ||
+   M | ||                   | ||
+     | ||                   | ||
+     `""'                   `""'
 """
 SIDEBAR_ART = r"""
    .   .

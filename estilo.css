@@ -98,9 +98,9 @@ Tab.-active {
 
 /* --- CONTENIDO: TRACKER DE MATERIAS --- */
 #lista_container {
-    height: 100%;
+    height: auto;
     border: round $secondary;
-    padding: 1;
+    padding: 0;
     background: $surface;
     overflow-x: auto;
     scrollbar-background: $surface;
@@ -112,12 +112,12 @@ MateriaWidget {
     margin-bottom: 1;
     padding: 1;
     border-bottom: solid ansi_bright_black;
- scrollbar-background: $surface;
-    scrollbar-color: $surface;
+ scrollbar-background: $background;
+    scrollbar-color: $background;
 }
 
 .nombre-materia {
-    width: 30;
+    width: auto;
     content-align: left middle;
     color: $primary;
     text-style: bold;
@@ -125,6 +125,8 @@ MateriaWidget {
 
 .barra-materia {
     width: 1fr; /* Ocupa todo el espacio flexible */
+    padding-left: 1;
+    padding-right: 1;
     content-align: center middle;
     color: $secondary;
 }
@@ -343,7 +345,7 @@ scrollbar-background: $surface;
 
 /* Panel Pomodoro en Dashboard */
 #dash_pomodoro {
-    height: 17; 
+    height: 39%; 
     border: round $secondary;
     margin-bottom: 0;
     background: $surface;
@@ -352,11 +354,13 @@ scrollbar-background: $surface;
 
 	/* Panel ToDo en Dashboard */
 	#dash_todo {
-	    height: 31;
+	    height: 65%;
 	    border: round $accent;
 	    background: $surface;
 	    padding: 1;
 	    margin-bottom: 1;
+	    scrollbar-background: $surface;
+	    scrollbar-color: $surface;
 	}
 
 
@@ -364,7 +368,7 @@ scrollbar-background: $surface;
 	.clock-panel {
 	    background: $surface; /* Un poco más oscuro si tu tema lo permite */
 	    border: ascii $primary;
-	    height: 6;
+	    height: 40%;
 	    align: center middle;
 	    margin-bottom: 0;
 	    padding: 0;
