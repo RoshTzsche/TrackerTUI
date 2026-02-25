@@ -3,7 +3,7 @@
         {
             "nombre": "Analisis matematico",
             "meta": 4.0,
-            "horas_acumuladas": 5.0
+            "horas_acumuladas": 0.0
         },
         {
             "nombre": "ML - SPV",
@@ -53,35 +53,15 @@
     ],
     "todos": [
         {
-            "text": "Osiris",
-            "done": false
-        },
-        {
-            "text": "Reporte de diodos",
-            "done": false
-        },
-        {
-            "text": "programacion defensiva",
-            "done": false
-        },
-        {
-            "text": "maquinas de estados",
-            "done": false
-        },
-        {
-            "text": "CS231n lecture 1,2 y 3",
-            "done": false
-        },
-        {
-            "text": "knn/linear classifiers/two layer nn/image features/",
-            "done": false
-        },
-        {
-            "text": "Tarea proba",
-            "done": false
-        },
-        {
             "text": "graficas de abricate(genes de resistencia, virus factors)",
+            "done": false
+        },
+        {
+            "text": "al reiniciar semana se dupplican las tareas, igual tenerlos en dos .json diferentes",
+            "done": false
+        },
+        {
+            "text": "FISH DB",
             "done": false
         }
     ]
